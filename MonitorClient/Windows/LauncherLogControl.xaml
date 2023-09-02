@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="MonitorClient.Windows.LauncherLogControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MonitorClient.Windows"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <ScrollViewer VerticalScrollBarVisibility="Visible" x:Name="logScrollView">
+        <TextBox x:Name="logBox"
+                       Width="1550"  MinHeight="800"
+                            Style="{StaticResource NoBorderTextBoxStyle}"
+                            Text="{Binding FullLog, Mode=OneWay}" 
+                            TextWrapping="Wrap"
+                            IsReadOnly="True"
+                            SelectionBrush="Blue"
+                            SelectionOpacity="0.5"/>
+    </ScrollViewer>
+</UserControl>

@@ -1,0 +1,16 @@
+﻿<Window x:Class="MonitorClient.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MonitorClient"
+        xmlns:localWindows="clr-namespace:MonitorClient.Windows"
+        mc:Ignorable="d"
+        Title="Monitor" 
+        Width="1550"  MinHeight="800">
+    <TabControl x:Name="Tabl">
+        <TabItem Header="Launcher Log">
+            <localWindows:LauncherLogControl x:Name="LauncherLogControl"/>
+        </TabItem>
+    </TabControl>
+</Window>
