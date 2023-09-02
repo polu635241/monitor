@@ -1,0 +1,20 @@
+﻿2023-09-02-19-01-47 -> {
+  "monitorDatas": [
+    {
+      "appName": "TeamViewer",
+      "pids": [
+        20900
+      ]
+    }
+  ]
+}
+2023-09-02-19-01-58 -> {
+  "monitorDatas": [
+    {
+      "appName": "TeamViewer",
+      "pids": [
+        20900
+      ]
+    }
+  ]
+}
