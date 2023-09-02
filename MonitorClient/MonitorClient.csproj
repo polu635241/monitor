@@ -98,9 +98,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="GameSettings\MonitorSetting.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -114,6 +111,9 @@
       <Project>{05AD6043-0113-425D-BF88-00C697AF0CED}</Project>
       <Name>MonitorCore</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="GameSettings\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

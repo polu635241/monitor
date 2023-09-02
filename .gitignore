@@ -25,11 +25,5 @@ ExportedObj/
 /*.opendb
 /*.VC.db
 
-#AuthorizationCode
-Infinity-Launcher/Infinity-Launcher/bin/Debug/AuthorizationCode.txt
 
-#launcher
-Infinity-Launcher/Infinity-Launcher/bin/Debug/Logs*
-Infinity-Launcher/Infinity-Launcher/bin/Debug/Games/*/Apks*
-Infinity-Launcher/Infinity-Launcher/bin/Debug/Games/*/Server*
-Infinity-Launcher/Infinity-Launcher/bin/Debug/Games/*/Observer*
+*/bin/

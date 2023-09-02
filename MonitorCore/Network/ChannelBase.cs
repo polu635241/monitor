@@ -51,6 +51,16 @@ namespace MonitorCore
 
         NetworkRouter networkRouter = new NetworkRouter ();
 
+        protected byte[] GetMsgBuffers<T> (int eventID, T msg)
+        {
+            MsgContainer msgContainer = new MsgContainer ();
+            msgContainer.eventID = eventID;
+            msgContainer.json = JsonUtility.ToJson (msg);
+
+            var buffers = networkRouter.GetMsgBuffers (msgContainer);
+            return buffers;
+        }
+
         /// <summary>
         /// 轉傳的依據
         /// </summary>

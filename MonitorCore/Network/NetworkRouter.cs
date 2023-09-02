@@ -8,7 +8,7 @@ namespace MonitorCore
 {
     public class NetworkRouter
     {
-        readonly int uintSize = sizeof (uint);
+        readonly int HeaderSize = sizeof (uint);
 
         public void ReceiveMsg (byte[] msg) 
         {
@@ -29,17 +29,17 @@ namespace MonitorCore
             //找出header
             if (bufferStatus == BufferStatus.WaitingHeader)
             {
-                if (buffer.Count >= uintSize)
+                if (buffer.Count >= HeaderSize)
                 {
                     bufferStatus = BufferStatus.WaitingMsg;
 
-                    var headerBuffer = new byte[uintSize];
+                    var headerBuffer = new byte[HeaderSize];
 
-                    buffer.CopyTo (0, headerBuffer, 0, uintSize);
+                    buffer.CopyTo (0, headerBuffer, 0, HeaderSize);
 
-                    headerSize = BitConverter.ToInt32 (headerBuffer, 0);
+                    msgSize = BitConverter.ToInt32 (headerBuffer, 0);
 
-                    var deltaSize = buffer.Count - uintSize;
+                    var deltaSize = buffer.Count - HeaderSize;
 
                     //還有剩
                     if (deltaSize > 0)
@@ -47,12 +47,12 @@ namespace MonitorCore
                         byte[] newBuffer = new byte[deltaSize];
 
                         //第一個參數是指從哪個index開始複製,
-                        //第四個參數只要複製多長
-                        buffer.CopyTo (uintSize, newBuffer, 0, deltaSize);
+                        //第四個參數指要複製多長
+                        buffer.CopyTo (HeaderSize, newBuffer, 0, deltaSize);
 
                         buffer = newBuffer.ToList ();
 
-                        if (deltaSize > headerSize)
+                        if (deltaSize > msgSize)
                         {
                             ProcessBuffer ();
                         }
@@ -61,13 +61,13 @@ namespace MonitorCore
             }
             else if (bufferStatus == BufferStatus.WaitingMsg)
             {
-                if (buffer.Count >= headerSize)
+                if (buffer.Count >= msgSize)
                 {
                     bufferStatus = BufferStatus.WaitingHeader;
 
-                    var msgBuffer = new byte[headerSize];
+                    var msgBuffer = new byte[msgSize];
 
-                    buffer.CopyTo (0, msgBuffer, 0, headerSize);
+                    buffer.CopyTo (0, msgBuffer, 0, msgSize);
 
                     string msg = encoding.GetString (msgBuffer);
 
@@ -84,7 +84,7 @@ namespace MonitorCore
                         }
                     }
 
-                    var deltaSize = buffer.Count - headerSize;
+                    var deltaSize = buffer.Count - msgSize;
 
                     //還有剩
                     if (deltaSize > 0)
@@ -92,12 +92,12 @@ namespace MonitorCore
                         byte[] newBuffer = new byte[deltaSize];
 
                         //第一個參數是指從哪個index開始複製,
-                        //第四個參數只要複製多長
-                        buffer.CopyTo (headerSize, newBuffer, 0, deltaSize);
+                        //第四個參數指要複製多長
+                        buffer.CopyTo (msgSize, newBuffer, 0, deltaSize);
 
                         buffer = newBuffer.ToList ();
 
-                        if (deltaSize > uintSize)
+                        if (deltaSize > HeaderSize)
                         {
                             ProcessBuffer ();
                         }
@@ -108,7 +108,7 @@ namespace MonitorCore
 
         Encoding encoding = Encoding.UTF8;
 
-        int headerSize;
+        int msgSize;
 
         BufferStatus bufferStatus = BufferStatus.WaitingHeader;
 

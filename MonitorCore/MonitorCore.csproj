@@ -44,12 +44,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Network\ChannelBase.cs" />
     <Compile Include="FileUtility.cs" />
     <Compile Include="JsonUtility.cs" />
     <Compile Include="LoggerRouter.cs" />
     <Compile Include="MD5Tool.cs" />
     <Compile Include="MonitorResult.cs" />
     <Compile Include="MonitorSetting.cs" />
+    <Compile Include="Network\NetworkRouter.cs" />
     <Compile Include="ParseManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
