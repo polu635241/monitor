@@ -65,12 +65,18 @@ namespace MonitorClient
 
         void OnServerDisconnect () 
         {
-            LoggerRouter.WriteLine ($"連接已斷開{serverSocket.RemoteEndPoint}");
+            if (channelTransport.ManualDisconnect == false)
+            {
+                LoggerRouter.WriteLine ($"連接已斷開{serverSocket.RemoteEndPoint}");
+            }
             serverSocket = null;
             ServerIsConnect = false;
             monitor.ClearSetting ();
 
-            BeginWaitServer ();
+            if (channelTransport.ManualDisconnect == false) 
+            {
+                BeginWaitServer ();
+            }
         }
 
         public bool ServerIsConnect { get; private set; } = false;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MonitorCore
@@ -36,12 +37,15 @@ namespace MonitorCore
             cacheEvents.Add ((eventID, proxy));
         }
 
+        CancellationTokenSource receiveMsgTokenSrc = new CancellationTokenSource ();
+
         public void BindingSocket (Socket socket, Action onDisconnect)
         {
             this.socket = socket;
             this.isConnect = true;
+            ManualDisconnect = false;
 
-            Task.Run (()=> 
+            Task.Run (() =>
             {
                 byte[] result = new byte[2048];
                 while (true)
@@ -70,8 +74,11 @@ namespace MonitorCore
                     }
                     catch (Exception e)
                     {
-                        LoggerRouter.WriteLine (e.Message);
-                        LoggerRouter.WriteLine (e.StackTrace);
+                        if (ManualDisconnect == false)
+                        {
+                            LoggerRouter.WriteLine (e.Message);
+                            LoggerRouter.WriteLine (e.StackTrace);
+                        }
 
                         Clear ();
                         onDisconnect ();
@@ -80,8 +87,13 @@ namespace MonitorCore
                         break;
                     }
                 }
-            });
+            }, receiveMsgTokenSrc.Token);
         }
+
+        /// <summary>
+        /// 手動斷線的flag
+        /// </summary>
+        public bool ManualDisconnect { get; private set; }
 
         public bool isConnect = false;
         Socket socket = null;
@@ -120,6 +132,9 @@ namespace MonitorCore
 
         public void Disconnect () 
         {
+            ManualDisconnect = true;
+            receiveMsgTokenSrc.Cancel ();
+
             if (isConnect)
             {
                 try 

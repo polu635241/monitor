@@ -133,7 +133,10 @@ namespace MonitorServer
 
             RevertToTemp ();
 
-            DoConnect ();
+            if (channelTransport.ManualDisconnect == false)
+            {
+                DoConnect ();
+            }
         }
 
         IAsyncResult IAsyncResult;
