@@ -47,6 +47,7 @@
     <Compile Include="GenericCmd.cs" />
     <Compile Include="Network\ChannelTransport.cs" />
     <Compile Include="Network\SysEvents.cs" />
+    <Compile Include="RebootCmd.cs" />
     <Compile Include="Tool\FileUtility.cs" />
     <Compile Include="Tool\JsonUtility.cs" />
     <Compile Include="LoggerRouter.cs" />

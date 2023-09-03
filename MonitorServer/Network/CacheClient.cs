@@ -76,7 +76,8 @@ namespace MonitorServer
 
         void OnClickRebootCmd () 
         {
-
+            RebootCmd cmd = new RebootCmd ();
+            channelTransport.SendMsg (SysEvents.RebootCmd, cmd);
         }
 
         string ip;
