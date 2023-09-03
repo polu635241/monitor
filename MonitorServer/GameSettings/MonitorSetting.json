@@ -1,7 +1,10 @@
 {
   "monitorApps": [
     {
-      "appName": "TeamViewer"
+      "appName": "chrome"
+    },
+    {
+      "appName": "Discord"
     }
   ]
 }

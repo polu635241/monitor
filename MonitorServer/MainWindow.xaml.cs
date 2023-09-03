@@ -23,9 +23,15 @@ namespace MonitorServer
     {
         public static MainWindow Instance { get; private set; }
 
+        public bool inEditor { get; private set; }
+
         public MainWindow ()
         {
-            Instance = this;
+            var args = Environment.GetCommandLineArgs ();
+
+            inEditor = args.Contains ("inEditor");
+
+               Instance = this;
             InitializeComponent ();
 
             this.Closing += Window_Closing;
@@ -36,11 +42,23 @@ namespace MonitorServer
             cacheClients = networkSetting.clients.ConvertAll (client=> 
             {
                 CacheClient cacheClient = new CacheClient ();
-                cacheClient.Init (client, networkSetting.reconnectTime, monitorSetting);
+                cacheClient.Init (client, networkSetting.reconnectTime, monitorSetting, OnModify);
                 return cacheClient;
             });
 
             cacheClients.ForEach (c => c.DoConnect ());
+
+            CacheClientControls.ItemsSource = cacheClients;
+        }
+
+        void OnModify () 
+        {
+            MainWindow.Instance.Dispatcher.Invoke (() =>
+            {
+                CacheClientControls.ItemsSource = new List<CacheClient> ();
+
+                CacheClientControls.ItemsSource = cacheClients;
+            });
         }
 
         List<CacheClient> cacheClients = new List<CacheClient> ();

@@ -25,8 +25,14 @@ namespace MonitorClient
     {
         public static MainWindow Instance { get; private set; }
 
+        public bool inEditor { get; private set; }
+
         public MainWindow ()
         {
+            var args = Environment.GetCommandLineArgs ();
+
+            inEditor = args.Contains ("inEditor");
+
             Instance = this;
 
             InitializeComponent ();

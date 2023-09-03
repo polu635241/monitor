@@ -10,5 +10,6 @@ namespace MonitorCore
     {
         public const int UpdateMonitorSetting = 1001;
         public const int UpdateMonitorResult = 1002;
+        public const int RebootCmd = 1003;
     }
 }

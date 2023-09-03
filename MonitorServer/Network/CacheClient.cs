@@ -1,22 +1,26 @@
 ﻿using MonitorCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace MonitorServer
 {
-    public class CacheClient
+    public class CacheClient : INotifyPropertyChanged
     {
         public bool isConnect;
 
         Socket clientSocket;
 
-        public void Init (string ip, float reconnectTime, MonitorSetting monitorSetting) 
+        public void Init (string ip, float reconnectTime, MonitorSetting monitorSetting, Action onModify)
         {
+            this.onModify = onModify;
+
             this.ip = ip;
             this.reconnectTime = reconnectTime;
 
@@ -28,9 +32,13 @@ namespace MonitorServer
             channelTransport.BindEvent<MonitorResult> (SysEvents.UpdateMonitorResult, OnMonitorResultUpdate);
         }
 
+        Action onModify;
+
         void OnMonitorResultUpdate (MonitorResult newRes) 
         {
             this.MonitorResult = newRes;
+
+            RebuildRunTimeMonitorDatas ();
         }
 
         MonitorSetting monitorSetting;
@@ -51,9 +59,25 @@ namespace MonitorServer
                 return monitorData;
             });
 
+            RebuildRunTimeMonitorDatas ();
         }
 
         float reconnectTime;
+
+        public string clientIP => ip;
+
+        public ICommand OnClickReboot 
+        {
+            get 
+            {
+                return new GenericCmd (OnClickRebootCmd);
+            }
+        }
+
+        void OnClickRebootCmd () 
+        {
+
+        }
 
         string ip;
 
@@ -92,6 +116,8 @@ namespace MonitorServer
 
         IAsyncResult IAsyncResult;
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public bool IsConnect { get; private set; }
 
         public void Dispose () 
@@ -101,5 +127,44 @@ namespace MonitorServer
                 channelTransport.Disconnect ();
             }
         }
+
+        void RebuildRunTimeMonitorDatas ()
+        {
+            runTimeMonitorDatas = MonitorResult.monitorDatas.ConvertAll (data => new RunTimeMonitorData (data));
+
+            onModify.Invoke ();
+        }
+
+        public List<RunTimeMonitorData> runTimeMonitorDatas;
+    }
+
+    public class RunTimeMonitorData : INotifyPropertyChanged
+    {
+        public RunTimeMonitorData (MonitorData monitorData) 
+        {
+            this.bindingData = monitorData;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        MonitorData bindingData;
+
+        public string appName => bindingData.appName;
+
+        public int appCount => pids.Count;
+
+        public List<RunTimeMonitorPID> pids => bindingData.pids.ConvertAll (pid => new RunTimeMonitorPID (pid));
+    }
+
+    public class RunTimeMonitorPID : INotifyPropertyChanged
+    {
+        public RunTimeMonitorPID (int pid) 
+        {
+            this.pid = pid.ToString ();
+        }
+
+        public string pid { get; set; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 }

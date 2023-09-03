@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GenericCmd.cs" />
     <Compile Include="Network\ChannelTransport.cs" />
     <Compile Include="Network\SysEvents.cs" />
     <Compile Include="Tool\FileUtility.cs" />

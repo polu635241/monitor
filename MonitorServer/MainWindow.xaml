@@ -4,9 +4,21 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MonitorServer"
+        xmlns:localWindows="clr-namespace:MonitorServer.Windows"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
-    </Grid>
+        Title="MonitorServer" MinHeight="800" MaxHeight="800" MaxWidth="800" MinWidth="800">
+    <StackPanel>
+        <ScrollViewer Height="770" HorizontalScrollBarVisibility="Hidden">
+            <ListBox x:Name="CacheClientControls" Width="750" BorderThickness="0">
+                <ListBox.ItemContainerStyle>
+                    <StaticResource ResourceKey="NoSelectBlankStyle"/>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <localWindows:CacheClientControl/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </ScrollViewer>
+    </StackPanel>
 </Window>

@@ -78,6 +78,15 @@ namespace MonitorClient
         {
             channelTransport = new ChannelTransport ();
             channelTransport.BindEvent<MonitorSetting> (SysEvents.UpdateMonitorSetting, monitor.UpdateSetting);
+            channelTransport.BindEvent<RebootCmd> (SysEvents.RebootCmd, OnReceiveRebootCmd);
+        }
+
+        void OnReceiveRebootCmd (RebootCmd rebootCmd) 
+        {
+            if (MainWindow.Instance.inEditor == false)
+            {
+                CmdTool.ProcessCmd ("cmd.exe", "shutdown.exe -f");
+            }
         }
 
         ApplicationMonitor monitor;
