@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F77EA699-F40F-458D-8087-B438514E641C}</ProjectGuid>
+    <ProjectGuid>{758DB6D4-3281-4246-8982-CAED7846C445}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>MonitorClient</RootNamespace>
-    <AssemblyName>MonitorClient</AssemblyName>
+    <RootNamespace>MonitorServer</RootNamespace>
+    <AssemblyName>MonitorServer</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -58,16 +58,16 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ApplicationMonitor.cs" />
-    <Compile Include="Network\NetworkClient.cs" />
-    <Compile Include="Windows\LauncherLogControl.xaml.cs">
-      <DependentUpon>LauncherLogControl.xaml</DependentUpon>
+    <Compile Include="Windows\AppMonitorResult.xaml.cs">
+      <DependentUpon>AppMonitorResult.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\CacheClientControl.xaml.cs">
+      <DependentUpon>CacheClientControl.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="CmdTool.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -76,12 +76,18 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Windows\LauncherLogControl.xaml">
+    <Page Include="Windows\AppMonitorResult.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\CacheClientControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NetworkSetting.cs" />
+    <Compile Include="Network\CacheClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -99,6 +105,15 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="GameSettings\ClientSetting.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="GameSettings\MonitorSetting.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="GameSettings\NetworkSetting.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -112,9 +127,6 @@
       <Project>{05AD6043-0113-425D-BF88-00C697AF0CED}</Project>
       <Name>MonitorCore</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="GameSettings\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

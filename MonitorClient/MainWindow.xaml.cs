@@ -1,6 +1,7 @@
 ﻿using MonitorCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,39 +25,44 @@ namespace MonitorClient
     {
         public static MainWindow Instance { get; private set; }
 
+        public bool inEditor { get; private set; }
+
         public MainWindow ()
         {
+            var args = Environment.GetCommandLineArgs ();
+
+            inEditor = args.Contains ("inEditor");
+
             Instance = this;
 
             InitializeComponent ();
+
+            networkClient = new NetworkClient ();
+            networkClient.Init ();
 
             updateTimer.Interval = TimeSpan.FromSeconds (deltaTime);
             updateTimer.Tick += OnUpdate;
             updateTimer.Start ();
 
-            monitorSetting = ParseManager.LoadJson<MonitorSetting> ();
 
-            monitor = new ApplicationMonitor ();
-
-            monitor.BindOnModify ((res) =>
-            {
-                LoggerRouter.WriteLine (JsonUtility.ToJson (res));
-            });
-            monitor.UpdateSetting (monitorSetting);
+            this.Closing += Window_Closing;
         }
 
-        ApplicationMonitor monitor;
+        NetworkClient networkClient;
 
         const float deltaTime = 1 / 10f;
 
         DispatcherTimer updateTimer = new DispatcherTimer ();
 
-        MonitorSetting monitorSetting;
-
         void OnUpdate (object sender, EventArgs e)
         {
             LauncherLogControl.Update (deltaTime);
-            monitor.Update (deltaTime);
+            networkClient.Update (deltaTime);
+        }
+
+        void Window_Closing (object sender, CancelEventArgs e)
+        {
+            networkClient.Dispose ();
         }
     }
 }

@@ -1,0 +1,10 @@
+{
+  "monitorApps": [
+    {
+      "appName": "chrome"
+    },
+    {
+      "appName": "Discord"
+    }
+  ]
+}

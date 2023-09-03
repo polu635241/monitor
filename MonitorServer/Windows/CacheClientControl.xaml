@@ -1,0 +1,24 @@
+﻿<UserControl x:Class="MonitorServer.Windows.CacheClientControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:localWindows="clr-namespace:MonitorServer.Windows"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="740">
+    <StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <Label Content="IP : "/>
+            <Label Content="{Binding clientIP}"/>
+            <Label Content="{Binding NetStatusMsg}" Margin="250,0,0,0" Foreground="{Binding NetStatusColor, Mode=OneWay}" Width="100"/>
+            <Button Content="Reboot" Margin="200,0,0,0" Command="{Binding OnClickReboot}" IsEnabled="{Binding UIEnable}"/>
+        </StackPanel>
+        <ListBox x:Name="AppMonitorResults" Width="740" BorderThickness="0">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <localWindows:AppMonitorResult/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </StackPanel>
+</UserControl>
