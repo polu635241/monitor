@@ -1,6 +1,7 @@
 ﻿using MonitorCore;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -85,7 +86,7 @@ namespace MonitorClient
         {
             if (MainWindow.Instance.inEditor == false)
             {
-                CmdTool.ProcessCmd ("cmd.exe", "shutdown.exe -f");
+                Process.Start ("shutdown", "/r /t 0 /f");
             }
         }
 
@@ -101,6 +102,13 @@ namespace MonitorClient
 
         public void Dispose () 
         {
+            if (channelTransport.isConnect) 
+            {
+                //receiverSocket.Shutdown (SocketShutdown.Both);
+            }
+
+            receiverSocket.Close ();
+
             channelTransport.Disconnect ();
         }
     }

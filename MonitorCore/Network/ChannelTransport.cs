@@ -18,9 +18,9 @@ namespace MonitorCore
             networkRouter.BindingOnMsg (OnMsg);
         }
 
-        public const int port = 7321;
+        public const int port = 7339;
 
-        public void BindEvent<T> (int eventID, Action<T> callback) where T:new ()
+        public void BindEvent<T> (int eventID, Action<T> callback) where T : new()
         {
             if (cacheEvents.Exists (pair => pair.eventID == eventID))
             {
@@ -36,7 +36,7 @@ namespace MonitorCore
             cacheEvents.Add ((eventID, proxy));
         }
 
-        public void BindingSocket (Socket socket, Action onDisconnect) 
+        public void BindingSocket (Socket socket, Action onDisconnect)
         {
             this.socket = socket;
             this.isConnect = true;
@@ -122,7 +122,16 @@ namespace MonitorCore
         {
             if (isConnect)
             {
-                socket.Disconnect (true);
+                try 
+                {
+                    socket.Shutdown (SocketShutdown.Both);
+                    socket.Close ();
+                }
+                catch (Exception e)
+                {
+                    LoggerRouter.WriteLine (e.Message);
+                    LoggerRouter.WriteLine (e.StackTrace);
+                }
             }
         }
 
