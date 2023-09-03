@@ -38,41 +38,53 @@ namespace MonitorCore
 
         public void BindingSocket (Socket socket, Action onDisconnect) 
         {
-            byte[] result = new byte[2048];
-            while (true)
-            {
-                try
-                {
-                    int receiveLength = socket.Receive (result);
+            this.socket = socket;
+            this.isConnect = true;
 
-                    if (receiveLength > 0)
+            Task.Run (()=> 
+            {
+                byte[] result = new byte[2048];
+                while (true)
+                {
+                    try
                     {
-                        var buffer = new byte[receiveLength];
-                        result.ToList ().CopyTo (0, buffer, 0, receiveLength);
-                        InputPackMsg (result);
-                    }
-                    else
-                    {
-                        if (receiveLength == 0)
+                        int receiveLength = socket.Receive (result);
+
+                        if (receiveLength > 0)
                         {
-                            Clear ();
-                            onDisconnect ();
-                            break;
+                            var buffer = new byte[receiveLength];
+                            result.ToList ().CopyTo (0, buffer, 0, receiveLength);
+                            InputPackMsg (buffer);
+                        }
+                        else
+                        {
+                            if (receiveLength == 0)
+                            {
+                                Clear ();
+                                onDisconnect ();
+                                isConnect = false;
+
+                                break;
+                            }
                         }
                     }
-                }
-                catch (Exception e)
-                {
-                    LoggerRouter.WriteLine (e.Message);
-                    LoggerRouter.WriteLine (e.StackTrace);
+                    catch (Exception e)
+                    {
+                        LoggerRouter.WriteLine (e.Message);
+                        LoggerRouter.WriteLine (e.StackTrace);
 
-                    Clear ();
-                    onDisconnect ();
+                        Clear ();
+                        onDisconnect ();
+                        isConnect = false;
 
-                    break;
+                        break;
+                    }
                 }
-            }
+            });
         }
+
+        public bool isConnect = false;
+        Socket socket = null;
 
         public void InputPackMsg (byte[] pack) 
         {
@@ -106,11 +118,36 @@ namespace MonitorCore
             networkRouter.Clear ();
         }
 
-        protected byte[] GetMsgBuffers<T> (int eventID, T msg)
+        public void Disconnect () 
+        {
+            if (isConnect)
+            {
+                socket.Disconnect (true);
+            }
+        }
+
+        public void SendMsg<T> (int eventID, T msg) 
+        {
+            if (isConnect) 
+            {
+                var json = JsonUtility.ToJson (msg, false);
+
+                var buffer = GetMsgBuffers (eventID, json);
+
+                socket.Send (buffer);
+                LoggerRouter.WriteLine ($"發送事件 {eventID}, {json}");
+            }
+            else
+            {
+                LoggerRouter.WriteLine ("斷線中無法發送訊息");
+            }
+        }
+
+        protected byte[] GetMsgBuffers (int eventID, string json)
         {
             MsgContainer msgContainer = new MsgContainer ();
             msgContainer.eventID = eventID;
-            msgContainer.json = JsonUtility.ToJson (msg);
+            msgContainer.json = json;
 
             var buffers = networkRouter.GetMsgBuffers (msgContainer);
             return buffers;

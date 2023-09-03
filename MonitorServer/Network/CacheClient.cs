@@ -15,12 +15,42 @@ namespace MonitorServer
 
         Socket clientSocket;
 
-        public void Init (string ip, float reconnectTime) 
+        public void Init (string ip, float reconnectTime, MonitorSetting monitorSetting) 
         {
             this.ip = ip;
             this.reconnectTime = reconnectTime;
 
+            this.monitorSetting = monitorSetting;
+
+            RevertToTemp ();
+
             channelTransport = new ChannelTransport ();
+            channelTransport.BindEvent<MonitorResult> (SysEvents.UpdateMonitorResult, OnMonitorResultUpdate);
+        }
+
+        void OnMonitorResultUpdate (MonitorResult newRes) 
+        {
+            this.MonitorResult = newRes;
+        }
+
+        MonitorSetting monitorSetting;
+
+        public MonitorResult MonitorResult { get; private set; }
+
+        /// <summary>
+        /// 把result清成空的
+        /// </summary>
+        void RevertToTemp ()
+        {
+            MonitorResult = new MonitorResult ();
+
+            MonitorResult.monitorDatas = monitorSetting.monitorApps.ConvertAll (app=> 
+            {
+                MonitorData monitorData = new MonitorData ();
+                monitorData.appName = app.appName;
+                return monitorData;
+            });
+
         }
 
         float reconnectTime;
@@ -41,6 +71,7 @@ namespace MonitorServer
                 {
                     LoggerRouter.WriteLine ($"{ip} 連線成功");
                     channelTransport.BindingSocket (tcpClient.Client, OnDisconnect);
+                    channelTransport.SendMsg (SysEvents.UpdateMonitorSetting, monitorSetting);
                 }
                 else
                 {
@@ -54,6 +85,8 @@ namespace MonitorServer
 
         void OnDisconnect () 
         {
+            RevertToTemp ();
+
             DoConnect ();
         }
 
@@ -65,7 +98,7 @@ namespace MonitorServer
         {
             if (isConnect) 
             {
-                clientSocket.Close ();
+                channelTransport.Disconnect ();
             }
         }
     }

@@ -18,14 +18,11 @@ namespace MonitorClient
 
         public void Init () 
         {
-            PrepareEvents ();
-
             monitor = new ApplicationMonitor ();
 
-            monitor.BindOnModify ((res) =>
-            {
-                LoggerRouter.WriteLine (JsonUtility.ToJson (res));
-            });
+            monitor.BindOnModify (OnMonitorAppModify);
+
+            PrepareEvents ();
 
             //Client等待接收Server訊息
             IPAddress ipAddress = IPAddress.Parse ("127.0.0.1");
@@ -38,6 +35,13 @@ namespace MonitorClient
             BeginWaitServer ();
         }
 
+        void OnMonitorAppModify (MonitorResult monitorResult) 
+        {
+            LoggerRouter.WriteLine (JsonUtility.ToJson (monitorResult));
+
+            channelTransport.SendMsg (SysEvents.UpdateMonitorResult, monitorResult);
+        }
+
         /// <summary>
         /// 等待Server連線進來
         /// </summary>
@@ -46,7 +50,7 @@ namespace MonitorClient
             Task.Run (() =>
             {
                 serverSocket = receiverSocket.Accept ();
-                serverIsConnect = true;
+                ServerIsConnect = true;
 
                 LoggerRouter.WriteLine ($"server連線成功 {serverSocket.RemoteEndPoint}");
 
@@ -60,15 +64,15 @@ namespace MonitorClient
 
         void OnServerDisconnect () 
         {
-            LoggerRouter.WriteLine ($"連接已斷開{serverSocket.RemoteEndPoint.ToString ()}");
+            LoggerRouter.WriteLine ($"連接已斷開{serverSocket.RemoteEndPoint}");
             serverSocket = null;
-            serverIsConnect = false;
+            ServerIsConnect = false;
             monitor.ClearSetting ();
 
             BeginWaitServer ();
         }
 
-        bool serverIsConnect = false;
+        public bool ServerIsConnect { get; private set; } = false;
 
         void PrepareEvents () 
         {
@@ -80,12 +84,15 @@ namespace MonitorClient
 
         public void Update (float deltaTime) 
         {
-            monitor.Update (deltaTime);
+            if (monitor != null) 
+            {
+                monitor.Update (deltaTime);
+            }
         }
 
         public void Dispose () 
         {
-            receiverSocket.Disconnect (true);
+            channelTransport.Disconnect ();
         }
     }
 

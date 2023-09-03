@@ -55,10 +55,14 @@ namespace MonitorCore
 
                         buffer = newBuffer.ToList ();
 
-                        if (deltaSize > msgSize)
+                        if (deltaSize >= msgSize)
                         {
                             ProcessBuffer ();
                         }
+                    }
+                    else
+                    {
+                        buffer = new List<byte> ();
                     }
                 }
             }
@@ -100,10 +104,14 @@ namespace MonitorCore
 
                         buffer = newBuffer.ToList ();
 
-                        if (deltaSize > HeaderSize)
+                        if (deltaSize >= HeaderSize)
                         {
                             ProcessBuffer ();
                         }
+                    }
+                    else
+                    {
+                        buffer = new List<byte> ();
                     }
                 }
             }
@@ -127,7 +135,7 @@ namespace MonitorCore
         {
             List<byte> msgBuffers = new List<byte> ();
 
-            var json = JsonUtility.ToJson (msg);
+            var json = JsonUtility.ToJson (msg, false);
 
             var jsonBuffer = encoding.GetBytes (json);
 

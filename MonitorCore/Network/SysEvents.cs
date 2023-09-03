@@ -9,5 +9,6 @@ namespace MonitorCore
     public static class SysEvents
     {
         public const int UpdateMonitorSetting = 1001;
+        public const int UpdateMonitorResult = 1002;
     }
 }

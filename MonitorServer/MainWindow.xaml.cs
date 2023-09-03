@@ -31,11 +31,12 @@ namespace MonitorServer
             this.Closing += Window_Closing;
 
             NetworkSetting networkSetting = ParseManager.LoadJson<NetworkSetting> ();
+            MonitorSetting monitorSetting = ParseManager.LoadJson<MonitorSetting> ();
 
             cacheClients = networkSetting.clients.ConvertAll (client=> 
             {
                 CacheClient cacheClient = new CacheClient ();
-                cacheClient.Init (client, networkSetting.reconnectTime);
+                cacheClient.Init (client, networkSetting.reconnectTime, monitorSetting);
                 return cacheClient;
             });
 

@@ -32,10 +32,12 @@ namespace MonitorClient
             InitializeComponent ();
 
             networkClient = new NetworkClient ();
+            networkClient.Init ();
 
             updateTimer.Interval = TimeSpan.FromSeconds (deltaTime);
             updateTimer.Tick += OnUpdate;
             updateTimer.Start ();
+
 
             this.Closing += Window_Closing;
         }
