@@ -8,13 +8,12 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace MonitorServer
 {
     public class CacheClient : INotifyPropertyChanged
     {
-        public bool isConnect;
-
         Socket clientSocket;
 
         public void Init (string ip, float reconnectTime, MonitorSetting monitorSetting, Action onModify)
@@ -94,6 +93,7 @@ namespace MonitorServer
             {
                 if (tcpClient.Connected)
                 {
+                    OnConnect ();
                     LoggerRouter.WriteLine ($"{ip} 連線成功");
                     channelTransport.BindingSocket (tcpClient.Client, OnDisconnect);
                     channelTransport.SendMsg (SysEvents.UpdateMonitorSetting, monitorSetting);
@@ -108,8 +108,29 @@ namespace MonitorServer
             }, tcpClient);
         }
 
+        void OnConnect () 
+        {
+            IsConnect = true;
+
+            OnConnectStatusChange ();
+        }
+
+        void OnConnectStatusChange () 
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged.Invoke (this, new PropertyChangedEventArgs (nameof (NetStatusMsg)));
+                PropertyChanged.Invoke (this, new PropertyChangedEventArgs (nameof (UIEnable)));
+                PropertyChanged.Invoke (this, new PropertyChangedEventArgs (nameof (NetStatusColor)));
+            }
+        }
+
         void OnDisconnect () 
         {
+            IsConnect = false;
+
+            OnConnectStatusChange ();
+
             RevertToTemp ();
 
             DoConnect ();
@@ -119,11 +140,47 @@ namespace MonitorServer
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        public bool UIEnable => IsConnect;
+
+        public Brush NetStatusColor
+        {
+            get
+            {
+                Color color = default;
+
+                if (IsConnect)
+                {
+                    color = (Color)ColorConverter.ConvertFromString ("green");
+                }
+                else
+                {
+                    color = (Color)ColorConverter.ConvertFromString ("red");
+                }
+
+                return new SolidColorBrush (color);
+            }
+        }
+
+        public string NetStatusMsg 
+        {
+            get 
+            {
+                if (IsConnect) 
+                {
+                    return "已成功連線";
+                }
+                else
+                {
+                    return "尚未連線";
+                }
+            }
+        }
+
         public bool IsConnect { get; private set; }
 
         public void Dispose () 
         {
-            if (isConnect) 
+            if (IsConnect) 
             {
                 channelTransport.Disconnect ();
             }

@@ -10,7 +10,8 @@
         <StackPanel Orientation="Horizontal">
             <Label Content="IP : "/>
             <Label Content="{Binding clientIP}"/>
-            <Button Content="Reboot" Margin="550,0,0,0" Command="{Binding OnClickReboot}"/>
+            <Label Content="{Binding NetStatusMsg}" Margin="250,0,0,0" Foreground="{Binding NetStatusColor, Mode=OneWay}" Width="100"/>
+            <Button Content="Reboot" Margin="200,0,0,0" Command="{Binding OnClickReboot}" IsEnabled="{Binding UIEnable}"/>
         </StackPanel>
         <ListBox x:Name="AppMonitorResults" Width="740" BorderThickness="0">
             <ListBox.ItemTemplate>
