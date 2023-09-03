@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{F77EA699-F40F-458D-8087-B438514E641C}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <RootNamespace>MonitorClient</RootNamespace>
     <AssemblyName>MonitorClient</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -59,6 +59,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="ApplicationMonitor.cs" />
+    <Compile Include="Network\NetworkClient.cs" />
     <Compile Include="Windows\LauncherLogControl.xaml.cs">
       <DependentUpon>LauncherLogControl.xaml</DependentUpon>
     </Compile>

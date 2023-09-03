@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace MonitorCore
 {
+    /// <summary>
+    /// 不對蒐集封包直到蒐集完畢後轉成字串還給上層
+    /// </summary>
     public class NetworkRouter
     {
         readonly int HeaderSize = sizeof (uint);
@@ -112,7 +115,13 @@ namespace MonitorCore
 
         BufferStatus bufferStatus = BufferStatus.WaitingHeader;
 
-        List<byte> buffer;
+        List<byte> buffer = new List<byte> ();
+
+        public void Clear () 
+        {
+            buffer = new List<byte> ();
+            bufferStatus = BufferStatus.WaitingHeader;
+        }
 
         public byte[] GetMsgBuffers<T> (T msg) 
         {

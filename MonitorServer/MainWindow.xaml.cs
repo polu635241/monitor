@@ -1,5 +1,7 @@
-﻿using System;
+﻿using MonitorCore;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,7 +13,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace MonitorServer
 {
@@ -20,9 +21,32 @@ namespace MonitorServer
     /// </summary>
     public partial class MainWindow : Window
     {
+        public static MainWindow Instance { get; private set; }
+
         public MainWindow ()
         {
+            Instance = this;
             InitializeComponent ();
+
+            this.Closing += Window_Closing;
+
+            NetworkSetting networkSetting = ParseManager.LoadJson<NetworkSetting> ();
+
+            cacheClients = networkSetting.clients.ConvertAll (client=> 
+            {
+                CacheClient cacheClient = new CacheClient ();
+                cacheClient.Init (client, networkSetting.reconnectTime);
+                return cacheClient;
+            });
+
+            cacheClients.ForEach (c => c.DoConnect ());
+        }
+
+        List<CacheClient> cacheClients = new List<CacheClient> ();
+
+        void Window_Closing (object sender, CancelEventArgs e) 
+        {
+            cacheClients.ForEach (c => c.Dispose ());
         }
     }
 }

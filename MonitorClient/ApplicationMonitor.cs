@@ -24,6 +24,16 @@ namespace MonitorClient
             timer = 0f;
         }
 
+        /// <summary>
+        /// 清除Setting
+        /// 下次連上才會補傳當前狀況
+        /// </summary>
+        public void ClearSetting () 
+        {
+            this.setting = null;
+            this.cacheMD5 = "";
+        }
+
         public void Update (float deltaTime) 
         {
             if (setting != null)

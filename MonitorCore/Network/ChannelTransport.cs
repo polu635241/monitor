@@ -1,17 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace MonitorCore
 {
-    public class ChannelBase
+    /// <summary>
+    /// 對其註冊事件
+    /// 並且在傳入的byte[]達到一個封包時會解析並觸發綁定的事件
+    /// </summary>
+    public class ChannelTransport
     {
-        public ChannelBase () 
+        public ChannelTransport () 
         {
             networkRouter.BindingOnMsg (OnMsg);
         }
+
+        public const int port = 7321;
 
         public void BindEvent<T> (int eventID, Action<T> callback) where T:new ()
         {
@@ -29,7 +36,48 @@ namespace MonitorCore
             cacheEvents.Add ((eventID, proxy));
         }
 
-        
+        public void BindingSocket (Socket socket, Action onDisconnect) 
+        {
+            byte[] result = new byte[2048];
+            while (true)
+            {
+                try
+                {
+                    int receiveLength = socket.Receive (result);
+
+                    if (receiveLength > 0)
+                    {
+                        var buffer = new byte[receiveLength];
+                        result.ToList ().CopyTo (0, buffer, 0, receiveLength);
+                        InputPackMsg (result);
+                    }
+                    else
+                    {
+                        if (receiveLength == 0)
+                        {
+                            Clear ();
+                            onDisconnect ();
+                            break;
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    LoggerRouter.WriteLine (e.Message);
+                    LoggerRouter.WriteLine (e.StackTrace);
+
+                    Clear ();
+                    onDisconnect ();
+
+                    break;
+                }
+            }
+        }
+
+        public void InputPackMsg (byte[] pack) 
+        {
+            networkRouter.ReceiveMsg (pack);
+        }
 
         List<(int eventID, Action<string> callback)> cacheEvents = new List<(int eventID, Action<string> callback)> ();
 
@@ -41,6 +89,8 @@ namespace MonitorCore
 
             if (eventIndex >= 0)
             {
+                LoggerRouter.WriteLine ($"觸發事件ID -> {msgContainer.eventID}, {msgContainer.json}");
+
                 cacheEvents[eventIndex].callback.Invoke (msgContainer.json);
             }
             else
@@ -50,6 +100,11 @@ namespace MonitorCore
         }
 
         NetworkRouter networkRouter = new NetworkRouter ();
+
+        public void Clear () 
+        {
+            networkRouter.Clear ();
+        }
 
         protected byte[] GetMsgBuffers<T> (int eventID, T msg)
         {
