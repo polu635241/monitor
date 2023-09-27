@@ -133,11 +133,11 @@ namespace MonitorServer
 
         void SetComputerName (string computerName)
         {
-            this.ComputerName = computerName;
+            this.computerName = computerName;
 
             if (PropertyChanged != null)
             {
-                PropertyChanged.Invoke (this, new PropertyChangedEventArgs (nameof (ComputerName)));
+                PropertyChanged.Invoke (this, new PropertyChangedEventArgs (nameof (CacheClient.computerName)));
             }
         }
 
@@ -182,7 +182,7 @@ namespace MonitorServer
             }
         }
 
-        public string ComputerName { get; private set; } = "";
+        public string computerName { get; private set; } = "";
 
         public string NetStatusMsg 
         {
