@@ -27,7 +27,7 @@ namespace MonitorClient
 
             //Client等待接收Server訊息
             IPAddress ipAddress = IPAddress.Parse ("127.0.0.1");
-            IPEndPoint ipEndPoint = new IPEndPoint (ipAddress, ChannelTransport.port);
+            IPEndPoint ipEndPoint = new IPEndPoint (IPAddress.Any, ChannelTransport.port);
 
             receiverSocket = new Socket (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             receiverSocket.Bind (ipEndPoint);
