@@ -25,8 +25,6 @@ namespace MonitorClient
 
             PrepareEvents ();
 
-            //Client等待接收Server訊息
-            IPAddress ipAddress = IPAddress.Parse ("127.0.0.1");
             IPEndPoint ipEndPoint = new IPEndPoint (IPAddress.Any, ChannelTransport.port);
 
             receiverSocket = new Socket (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -58,6 +56,11 @@ namespace MonitorClient
                 //本來就獨立線了
                 //不用再開一條
                 channelTransport.BindingSocket (serverSocket, OnServerDisconnect);
+
+                ClientReqResult clientReqResult = new ClientReqResult ();
+                clientReqResult.computerName = Environment.MachineName;
+
+                channelTransport.SendMsg (SysEvents.ClientReq, clientReqResult);
             });
         }
 

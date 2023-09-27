@@ -29,9 +29,15 @@ namespace MonitorServer
 
             channelTransport = new ChannelTransport ();
             channelTransport.BindEvent<MonitorResult> (SysEvents.UpdateMonitorResult, OnMonitorResultUpdate);
+            channelTransport.BindEvent<ClientReqResult> (SysEvents.ClientReq, OnClientReq);
         }
 
         Action onModify;
+
+        void OnClientReq (ClientReqResult req) 
+        {
+            SetComputerName (req.computerName);
+        }
 
         void OnMonitorResultUpdate (MonitorResult newRes) 
         {
@@ -125,9 +131,21 @@ namespace MonitorServer
             }
         }
 
+        void SetComputerName (string computerName)
+        {
+            this.ComputerName = computerName;
+
+            if (PropertyChanged != null)
+            {
+                PropertyChanged.Invoke (this, new PropertyChangedEventArgs (nameof (ComputerName)));
+            }
+        }
+
         void OnDisconnect () 
         {
             IsConnect = false;
+
+            SetComputerName ("");
 
             OnConnectStatusChange ();
 
@@ -163,6 +181,8 @@ namespace MonitorServer
                 return new SolidColorBrush (color);
             }
         }
+
+        public string ComputerName { get; private set; } = "";
 
         public string NetStatusMsg 
         {

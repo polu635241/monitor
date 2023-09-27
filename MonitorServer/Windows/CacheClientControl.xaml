@@ -5,15 +5,16 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:localWindows="clr-namespace:MonitorServer.Windows"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="740">
+             d:DesignHeight="350" d:DesignWidth="420">
     <StackPanel>
-        <StackPanel Orientation="Horizontal">
+        <StackPanel Orientation="Horizontal" Background="#F0F0F0">
             <Label Content="IP : "/>
             <Label Content="{Binding clientIP}"/>
-            <Label Content="{Binding NetStatusMsg}" Margin="250,0,0,0" Foreground="{Binding NetStatusColor, Mode=OneWay}" Width="100"/>
-            <Button Content="Reboot" Margin="200,0,0,0" Command="{Binding OnClickReboot}" IsEnabled="{Binding UIEnable}"/>
+            <Label Content="{Binding NetStatusMsg}" Margin="20,0,0,0" Foreground="{Binding NetStatusColor, Mode=OneWay}" Width="100"/>
+            <Label Content="{Binding computerName}" Width="100"/>
+            <Button Content="Reboot" Margin="20,0,0,0" Command="{Binding OnClickReboot}" IsEnabled="{Binding UIEnable}"/>
         </StackPanel>
-        <ListBox x:Name="AppMonitorResults" Width="740" BorderThickness="0">
+        <ListBox x:Name="AppMonitorResults" Width="420" BorderThickness="0">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <localWindows:AppMonitorResult/>

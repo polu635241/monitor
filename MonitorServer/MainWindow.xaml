@@ -6,10 +6,10 @@
         xmlns:local="clr-namespace:MonitorServer"
         xmlns:localWindows="clr-namespace:MonitorServer.Windows"
         mc:Ignorable="d"
-        Title="MonitorServer" MinHeight="800" MaxHeight="800" MaxWidth="800" MinWidth="800">
+        Title="MonitorServer" MinHeight="300" MaxHeight="300" MaxWidth="450" MinWidth="450">
     <StackPanel>
-        <ScrollViewer Height="770" HorizontalScrollBarVisibility="Hidden">
-            <ListBox x:Name="CacheClientControls" Width="750" BorderThickness="0">
+        <ScrollViewer Height="270" HorizontalScrollBarVisibility="Hidden">
+            <ListBox x:Name="CacheClientControls" Width="450" BorderThickness="0">
                 <ListBox.ItemContainerStyle>
                     <StaticResource ResourceKey="NoSelectBlankStyle"/>
                 </ListBox.ItemContainerStyle>
