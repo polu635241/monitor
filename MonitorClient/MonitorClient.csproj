@@ -60,6 +60,7 @@
     </ApplicationDefinition>
     <Compile Include="ApplicationMonitor.cs" />
     <Compile Include="Network\BindingCache.cs" />
+    <Compile Include="Network\ServerCache.cs" />
     <Compile Include="Network\NetworkClient.cs" />
     <Compile Include="Windows\LauncherLogControl.xaml.cs">
       <DependentUpon>LauncherLogControl.xaml</DependentUpon>

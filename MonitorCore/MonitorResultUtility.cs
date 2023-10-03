@@ -49,6 +49,6 @@ namespace MonitorCore
         public List<string> beAdds = new List<string> ();
         public List<string> beModifys = new List<string> ();
 
-        public bool HasValue => beRemoves.Count > 0 || beAdds.Count > 0 || beModifys > 0;
+        public bool HasValue => beRemoves.Count > 0 || beAdds.Count > 0 || beModifys.Count > 0;
     }
 }
