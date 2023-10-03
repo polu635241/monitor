@@ -15,30 +15,25 @@ namespace MonitorClient
     {
         Socket receiverSocket;
 
-        ChannelTransport channelTransport;
-
         public void Init () 
         {
             monitor = new ApplicationMonitor ();
 
-            monitor.BindOnModify (OnMonitorAppModify);
-
-            PrepareEvents ();
+            monitor.BindOnMonitor (OnMonitorAppModify);
 
             IPEndPoint ipEndPoint = new IPEndPoint (IPAddress.Any, ChannelTransport.port);
-
             receiverSocket = new Socket (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             receiverSocket.Bind (ipEndPoint);
-            receiverSocket.Listen (1);
+            receiverSocket.Listen (int.MaxValue);
 
             BeginWaitServer ();
         }
 
-        void OnMonitorAppModify (MonitorResult monitorResult) 
+        void OnMonitorAppModify (MonitorResult monitorResult)
         {
             LoggerRouter.WriteLine (JsonUtility.ToJson (monitorResult));
 
-            channelTransport.SendMsg (SysEvents.UpdateMonitorResult, monitorResult);
+            serverCaches.ForEach (server => server.OnMonitorAppModify (monitorResult));
         }
 
         /// <summary>
@@ -48,55 +43,42 @@ namespace MonitorClient
         {
             Task.Run (() =>
             {
-                serverSocket = receiverSocket.Accept ();
-                ServerIsConnect = true;
+                var newServerSocket = receiverSocket.Accept ();
 
-                LoggerRouter.WriteLine ($"server連線成功 {serverSocket.RemoteEndPoint}");
+                LoggerRouter.WriteLine ($"server連線成功 {newServerSocket.RemoteEndPoint}");
+                ServerCache serverCache = new ServerCache (newServerSocket, locker, this);
 
-                //本來就獨立線了
-                //不用再開一條
-                channelTransport.BindingSocket (serverSocket, OnServerDisconnect);
+                lock (locker) 
+                {
+                    serverCaches.Add (serverCache);
+                }
 
-                ClientReqResult clientReqResult = new ClientReqResult ();
-                clientReqResult.computerName = Environment.MachineName;
-
-                channelTransport.SendMsg (SysEvents.ClientReq, clientReqResult);
+                serverCache.SendInitPack ();
             });
         }
 
-        Socket serverSocket = null;
+        object locker = new object ();
 
-        void OnServerDisconnect () 
-        {
-            if (channelTransport.ManualDisconnect == false)
-            {
-                LoggerRouter.WriteLine ($"連接已斷開{serverSocket.RemoteEndPoint}");
-            }
-            serverSocket = null;
-            ServerIsConnect = false;
-            monitor.ClearSetting ();
-
-            if (channelTransport.ManualDisconnect == false) 
-            {
-                BeginWaitServer ();
-            }
-        }
-
-        public bool ServerIsConnect { get; private set; } = false;
-
-        void PrepareEvents () 
-        {
-            channelTransport = new ChannelTransport ();
-            channelTransport.BindEvent<MonitorSetting> (SysEvents.UpdateMonitorSetting, monitor.UpdateSetting);
-            channelTransport.BindEvent<RebootCmd> (SysEvents.RebootCmd, OnReceiveRebootCmd);
-        }
-
-        void OnReceiveRebootCmd (RebootCmd rebootCmd) 
+        public void OnReceiveRebootCmd (RebootCmd rebootCmd) 
         {
             if (MainWindow.Instance.inEditor == false)
             {
                 Process.Start ("shutdown", "/r /t 0 /f");
             }
+        }
+
+        public void OnAnyServerSettingModify (bool checkImmediately) 
+        {
+            var settings = serverCaches.ConvertAll (server => server.MonitorSetting);
+
+            monitor.UpdateSettings (settings, checkImmediately);
+        }
+
+        public void OnServerDisconnect (ServerCache serverCache) 
+        {
+            serverCaches.Remove (serverCache);
+
+            OnAnyServerSettingModify (false);
         }
 
         ApplicationMonitor monitor;
@@ -111,15 +93,13 @@ namespace MonitorClient
 
         public void Dispose () 
         {
-            if (channelTransport.isConnect) 
-            {
-                //receiverSocket.Shutdown (SocketShutdown.Both);
-            }
-
             receiverSocket.Close ();
 
-            channelTransport.Disconnect ();
+            serverCaches.ForEach (serverCache => serverCache.Dispose ());
+            serverCaches.Clear ();
         }
+
+        List<ServerCache> serverCaches = new List<ServerCache> ();
     }
 
 }

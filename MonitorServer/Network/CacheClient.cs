@@ -37,6 +37,8 @@ namespace MonitorServer
         void OnClientReq (ClientReqResult req) 
         {
             SetComputerName (req.computerName);
+
+            channelTransport.SendMsg (SysEvents.UpdateMonitorSetting, monitorSetting);
         }
 
         void OnMonitorResultUpdate (MonitorResult newRes) 
@@ -102,7 +104,6 @@ namespace MonitorServer
                     OnConnect ();
                     LoggerRouter.WriteLine ($"{ip} 連線成功");
                     channelTransport.BindingSocket (tcpClient.Client, OnDisconnect);
-                    channelTransport.SendMsg (SysEvents.UpdateMonitorSetting, monitorSetting);
                 }
                 else
                 {

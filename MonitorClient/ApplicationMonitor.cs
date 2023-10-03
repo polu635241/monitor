@@ -9,34 +9,49 @@ namespace MonitorClient
 {
     public class ApplicationMonitor
     {
-        public void BindOnModify (Action<MonitorResult> onModify) 
+        public void BindOnMonitor (Action<MonitorResult> onMonitor)
         {
-            this.onModify = onModify;
-        }
-
-        Action<MonitorResult> onModify;
-
-        public void UpdateSetting (MonitorSetting setting)
-        {
-            this.setting = setting;
-
-            DoCheck ();
-            timer = 0f;
+            this.onMonitor = onMonitor;
         }
 
         /// <summary>
-        /// 清除Setting
-        /// 下次連上才會補傳當前狀況
+        /// 每個Server會各自提出自己想檢測的部分,
+        /// 進來後動態合併
         /// </summary>
-        public void ClearSetting () 
+        /// <param name="setting"></param>
+        public void UpdateSettings (List<MonitorSetting> settings, bool checkImmediately)
         {
-            this.setting = null;
-            this.cacheMD5 = "";
+            this.settings = settings.ToList ();
+
+            OnSettingUpdate (checkImmediately);
         }
+
+        List<MonitorSetting> settings = new List<MonitorSetting> ();
+
+        Action<MonitorResult> onMonitor;
+
+        void OnSettingUpdate (bool checkImmediately)
+        {
+            //目前setting裡面只有name,
+            //先用name產生唯一列表再轉回來
+            var appNames = settings.SelectMany (setting => setting.monitorApps).ToList ().ConvertAll (setting => setting.appName);
+            appNames = appNames.Distinct ().ToList ();
+
+            this.mergeSetting = new MonitorSetting ();
+            this.mergeSetting.monitorApps = appNames.ConvertAll (appName => new ApplicationSetting (appName));
+
+            if (checkImmediately) 
+            {
+                DoCheck ();
+                timer = 0f;
+            }
+        }
+
+        List<BindingCache> bindingCaches = new List<BindingCache> ();
 
         public void Update (float deltaTime) 
         {
-            if (setting != null)
+            if (mergeSetting != null)
             {
                 timer += deltaTime;
 
@@ -52,7 +67,7 @@ namespace MonitorClient
 
         float timer;
 
-        MonitorSetting setting;
+        MonitorSetting mergeSetting;
 
         void DoCheck () 
         {
@@ -60,9 +75,10 @@ namespace MonitorClient
 
             MonitorResult result = new MonitorResult ();
 
-            setting.monitorApps.ForEach (app=> 
+            mergeSetting.monitorApps.ForEach (app=> 
             {
                 var pids = processes.FindAll (p => p.ProcessName == app.appName).ConvertAll (p => p.Id);
+                pids.Sort ();
 
                 MonitorData monitorData = new MonitorData ()
                 {
@@ -73,23 +89,12 @@ namespace MonitorClient
                 result.monitorDatas.Add (monitorData);
             });
 
-            var json = JsonUtility.ToJson (result);
+            MonitorModifyResult modifyResult = cacheResult.GetModify (result);
 
-            var newMD5 = MD5Tool.ToMD5 (json);
-
-            if (newMD5 != cacheMD5)
-            {
-                cacheMD5 = newMD5;
-
-                if (onModify != null)
-                {
-                    onModify.Invoke (result);
-                }
-            }
+            this.cacheResult = result;
         }
 
 
-        //用來讓json比對是否有變化的
-        string cacheMD5 = "";
+        MonitorResult cacheResult = new MonitorResult ();
     }
 }
