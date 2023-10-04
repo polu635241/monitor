@@ -113,6 +113,8 @@ namespace MonitorClient
                 {
                     serverCaches.ForEach (cache => cache.SendHeartBeat ());
                 }
+
+                timer = 0f;
             }
         }
 
