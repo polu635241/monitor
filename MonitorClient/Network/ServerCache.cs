@@ -25,6 +25,17 @@ namespace MonitorClient
             channelTransport.BindEvent<RebootCmd> (SysEvents.RebootCmd, networkClient.OnReceiveRebootCmd);
         }
 
+        public void SendHeartBeat () 
+        {
+            if (channelTransport.isConnect) 
+            {
+                HeartBeatMsg heartBeatMsg = new HeartBeatMsg ();
+                heartBeatMsg.ticks = DateTime.Now.Ticks;
+
+                channelTransport.SendMsg (SysEvents.HeartBeat, heartBeatMsg);
+            }
+        }
+
         public void SendInitPack () 
         {
             ClientReqResult clientReqResult = new ClientReqResult ();
@@ -53,7 +64,7 @@ namespace MonitorClient
 
         public MonitorSetting MonitorSetting { get; private set; } = new MonitorSetting ();
 
-        public void OnMonitorAppModify (MonitorResult monitorResult) 
+        public void OnMonitorAppModify (MonitorResult monitorResult, out bool hasModify) 
         {
             var localResult = new MonitorResult ();
             localResult.monitorDatas = monitorResult.monitorDatas.FindAll (data => MonitorSetting.monitorApps.Exists (app=> 
@@ -63,6 +74,8 @@ namespace MonitorClient
 
             var modfiy = cacheResult.GetModify (localResult);
 
+            hasModify = modfiy.HasValue;
+
             cacheResult = localResult;
 
             if (modfiy.HasValue) 
@@ -71,7 +84,7 @@ namespace MonitorClient
                 {
                     if (channelTransport.isConnect)
                     {
-                        channelTransport.SendMsg (SysEvents.UpdateMonitorResult, monitorResult);
+                        channelTransport.SendMsg (SysEvents.UpdateMonitorResult, localResult);
                     }
                 }
                 catch (Exception e)

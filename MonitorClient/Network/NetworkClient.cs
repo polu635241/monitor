@@ -31,9 +31,21 @@ namespace MonitorClient
 
         void OnMonitorAppModify (MonitorResult monitorResult)
         {
-            LoggerRouter.WriteLine (JsonUtility.ToJson (monitorResult));
+            bool hasModify = false;
+            serverCaches.ForEach (server => 
+            {
+                server.OnMonitorAppModify (monitorResult, out bool _hasModify);
 
-            serverCaches.ForEach (server => server.OnMonitorAppModify (monitorResult));
+                if (_hasModify) 
+                {
+                    hasModify = true;
+                }
+            });
+
+            if (hasModify) 
+            {
+                LoggerRouter.WriteLine (JsonUtility.ToJson (monitorResult));
+            }
         }
 
         /// <summary>
@@ -43,17 +55,20 @@ namespace MonitorClient
         {
             Task.Run (() =>
             {
-                var newServerSocket = receiverSocket.Accept ();
-
-                LoggerRouter.WriteLine ($"server連線成功 {newServerSocket.RemoteEndPoint}");
-                ServerCache serverCache = new ServerCache (newServerSocket, locker, this);
-
-                lock (locker) 
+                while (true) 
                 {
-                    serverCaches.Add (serverCache);
-                }
+                    var newServerSocket = receiverSocket.Accept ();
 
-                serverCache.SendInitPack ();
+                    LoggerRouter.WriteLine ($"server連線成功 {newServerSocket.RemoteEndPoint}");
+                    ServerCache serverCache = new ServerCache (newServerSocket, locker, this);
+
+                    lock (locker)
+                    {
+                        serverCaches.Add (serverCache);
+                    }
+
+                    serverCache.SendInitPack ();
+                }
             });
         }
 
@@ -89,7 +104,19 @@ namespace MonitorClient
             {
                 monitor.Update (deltaTime);
             }
+
+            timer += deltaTime;
+
+            if (timer > 30f) 
+            {
+                lock (locker) 
+                {
+                    serverCaches.ForEach (cache => cache.SendHeartBeat ());
+                }
+            }
         }
+
+        float timer = 0f;
 
         public void Dispose () 
         {

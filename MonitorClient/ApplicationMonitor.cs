@@ -47,8 +47,6 @@ namespace MonitorClient
             }
         }
 
-        List<BindingCache> bindingCaches = new List<BindingCache> ();
-
         public void Update (float deltaTime) 
         {
             if (mergeSetting != null)
@@ -89,12 +87,7 @@ namespace MonitorClient
                 result.monitorDatas.Add (monitorData);
             });
 
-            MonitorModifyResult modifyResult = cacheResult.GetModify (result);
-
-            this.cacheResult = result;
+            onMonitor.Invoke (result);
         }
-
-
-        MonitorResult cacheResult = new MonitorResult ();
     }
 }

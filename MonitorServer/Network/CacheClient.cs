@@ -30,9 +30,19 @@ namespace MonitorServer
             channelTransport = new ChannelTransport ();
             channelTransport.BindEvent<MonitorResult> (SysEvents.UpdateMonitorResult, OnMonitorResultUpdate);
             channelTransport.BindEvent<ClientReqResult> (SysEvents.ClientReq, OnClientReq);
+            channelTransport.BindEvent<HeartBeatMsg> (SysEvents.HeartBeat, OnHeartBeat);
         }
 
         Action onModify;
+
+        void OnHeartBeat (HeartBeatMsg heartBeatMsg) 
+        {
+            DateTime dateTime = new DateTime (heartBeatMsg.ticks);
+
+            var msg = dateTime.ToString ("yyyy-MM-dd HH:mm:ss");
+
+            LoggerRouter.WriteLine ($"收到心跳包 -> {msg}");
+        }
 
         void OnClientReq (ClientReqResult req) 
         {
