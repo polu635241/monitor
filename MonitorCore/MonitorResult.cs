@@ -7,12 +7,6 @@ using System.Threading.Tasks;
 namespace MonitorCore
 {
     [Serializable]
-    public class ClientReqResult 
-    {
-        public string computerName;
-    }
-
-    [Serializable]
     public class MonitorResult
     {
         public List<MonitorData> monitorDatas = new List<MonitorData> ();

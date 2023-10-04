@@ -15,6 +15,16 @@ namespace MonitorCore
     [Serializable]
     public class ApplicationSetting
     {
+        public ApplicationSetting (string appName) 
+        {
+            this.appName = appName;
+        }
+
+        public ApplicationSetting () 
+        {
+            
+        }
+
         public string appName;
     }
 }

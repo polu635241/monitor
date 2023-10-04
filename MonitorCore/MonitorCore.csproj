@@ -44,7 +44,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClientReqResult.cs" />
     <Compile Include="GenericCmd.cs" />
+    <Compile Include="HeartBeatMsg.cs" />
+    <Compile Include="MonitorResultUtility.cs" />
     <Compile Include="Network\ChannelTransport.cs" />
     <Compile Include="Network\SysEvents.cs" />
     <Compile Include="RebootCmd.cs" />
