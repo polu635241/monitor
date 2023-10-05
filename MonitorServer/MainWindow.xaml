@@ -6,8 +6,13 @@
         xmlns:local="clr-namespace:MonitorServer"
         xmlns:localWindows="clr-namespace:MonitorServer.Windows"
         mc:Ignorable="d"
-        Title="MonitorServer" MaxHeight="600" MinHeight="600" MaxWidth="450" MinWidth="450">
-    <StackPanel>
+        Title="MonitorServer" MaxHeight="400" MaxWidth="800" MinHeight="400"  MinWidth="800">
+    <StackPanel Background="Black">
+        <StackPanel Orientation="Horizontal" Margin="5,5,0,5">
+            <Label Content="檢測列表" Foreground="White" FontSize="16"/>
+            <Label Content="連線數" Foreground="White" FontSize="16" Margin="400,0,0,0"/>
+            <Label Content="27/28" Name="ConnectStatusText" Foreground="White" FontSize="16"/>
+        </StackPanel>
         <ScrollViewer Height="570" HorizontalScrollBarVisibility="Hidden">
             <ListBox x:Name="CacheClientControls" Width="450" BorderThickness="0">
                 <ListBox.ItemContainerStyle>

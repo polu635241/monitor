@@ -42,13 +42,22 @@ namespace MonitorServer
             cacheClients = networkSetting.clients.ConvertAll (client=> 
             {
                 CacheClient cacheClient = new CacheClient ();
-                cacheClient.Init (client, networkSetting.reconnectTime, monitorSetting, OnModify);
+                cacheClient.Init (client, networkSetting.reconnectTime, monitorSetting, OnModify, OnConnectChange);
                 return cacheClient;
             });
+
+            OnConnectChange ();
 
             cacheClients.ForEach (c => c.DoConnect ());
 
             CacheClientControls.ItemsSource = cacheClients;
+        }
+
+        void OnConnectChange () 
+        {
+            var connectCount = cacheClients.Count (c => c.IsConnect);
+
+            ConnectStatusText.Content = $"{connectCount}/{cacheClients.Count}";
         }
 
         void OnModify () 

@@ -14,11 +14,10 @@ namespace MonitorServer
 {
     public class CacheClient : INotifyPropertyChanged
     {
-        Socket clientSocket;
-
-        public void Init (string ip, float reconnectTime, MonitorSetting monitorSetting, Action onModify)
+        public void Init (string ip, float reconnectTime, MonitorSetting monitorSetting, Action onModify, Action onConnectChange)
         {
             this.onModify = onModify;
+            this.onConnectChange = onConnectChange;
 
             this.ip = ip;
             this.reconnectTime = reconnectTime;
@@ -34,6 +33,8 @@ namespace MonitorServer
         }
 
         Action onModify;
+
+        Action onConnectChange;
 
         void OnHeartBeat (HeartBeatMsg heartBeatMsg) 
         {
@@ -127,9 +128,14 @@ namespace MonitorServer
 
         void OnConnect () 
         {
-            IsConnect = true;
+            MainWindow.Instance.Dispatcher.Invoke (()=> 
+            {
+                IsConnect = true;
 
-            OnConnectStatusChange ();
+                OnConnectStatusChange ();
+
+                onConnectChange.Invoke ();
+            });
         }
 
         void OnConnectStatusChange () 
@@ -156,16 +162,21 @@ namespace MonitorServer
         {
             IsConnect = false;
 
-            SetComputerName ("");
-
-            OnConnectStatusChange ();
-
-            RevertToTemp ();
-
             if (channelTransport.ManualDisconnect == false)
             {
                 DoConnect ();
             }
+
+            MainWindow.Instance.Dispatcher.Invoke (()=> 
+            {
+                SetComputerName ("");
+
+                OnConnectStatusChange ();
+
+                RevertToTemp ();
+
+                onConnectChange.Invoke ();
+            });
         }
 
         IAsyncResult IAsyncResult;
