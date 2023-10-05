@@ -1,0 +1,39 @@
+﻿<UserControl x:Class="MonitorServer.Windows.SelectClient"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MonitorServer.Windows"
+             xmlns:localWindows="clr-namespace:MonitorServer.Windows"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="300">
+    <StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <Label Content="{Binding computerName}" Foreground="White" Width="140" Margin="100,0,0,0"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <Label Content="連線狀態:" Foreground="White"/>
+            <Label Content="{Binding NetStatusMsg}" Margin="0,0,15,0" Foreground="{Binding NetStatusColor}"/>
+            <Ellipse Width="10" Height="10" Fill="{Binding FullStatusColor, Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,15,0"/>
+            <Label Content="檢測狀態:" Foreground="White"/>
+            <Label Content="{Binding AppStatusMsg}" Margin="0,0,15,0" Foreground="{Binding AppStatusColor}"/>
+            <Ellipse Width="10" Height="10" Fill="{Binding AppStatusColor, Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,15,0"/>
+        </StackPanel>
+        <Label Content="程序檢測列表：" Foreground="White"/>
+        <StackPanel Orientation="Vertical">
+            <ScrollViewer Height="200" HorizontalScrollBarVisibility="Hidden" HorizontalAlignment="Left">
+                <ListBox x:Name="AppMonitorResults" Width="300" BorderThickness="0" Background="#3C3C3C">
+                    <ListBox.ItemContainerStyle>
+                        <StaticResource ResourceKey="NoSelectBlankStyle"/>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <localWindows:AppMonitorResult Background="#5B5B5B"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </ScrollViewer>
+            <Button Content="重新啟動" Margin="0,5,0,5" Command="{Binding OnClickReboot}" IsEnabled="{Binding UIEnable}" Width="70" Height="30" Background="#0072E3"/>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

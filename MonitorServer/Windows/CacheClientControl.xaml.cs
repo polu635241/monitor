@@ -32,8 +32,6 @@ namespace MonitorServer.Windows
             if (DataContext != null) 
             {
                 cacheClient = DataContext as CacheClient;
-
-                AppMonitorResults.ItemsSource = cacheClient.runTimeMonitorDatas;
             }
         }
 
