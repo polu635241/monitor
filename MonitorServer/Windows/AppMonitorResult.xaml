@@ -5,23 +5,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:localWindow="clr-namespace:MonitorServer.Windows"
              mc:Ignorable="d" 
-             d:DesignHeight="250" d:DesignWidth="420">
-    <StackPanel>
-        <StackPanel Orientation="Horizontal">
-            <Label Content="{Binding appName}"/>
-        </StackPanel>
-        <StackPanel Orientation="Horizontal">
-            <Label Content="開啟的程序 數量"/>
-            <Label Content="{Binding appCount}"/>
-        </StackPanel>
-        <ScrollViewer Height="50" HorizontalScrollBarVisibility="Hidden">
-            <ListBox x:Name="PIDs" Width="360" BorderThickness="0">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Label Content="{Binding pid}"/>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-        </ScrollViewer>
+             d:DesignHeight="50" d:DesignWidth="150">
+    <StackPanel Orientation="Horizontal">
+        <Label Content="{Binding appName}" Foreground="White" Width="230"/>
+        <Label Content="{Binding appStatus}" Foreground="Black" Background="{Binding appStatusColor}"/>
     </StackPanel>
 </UserControl>

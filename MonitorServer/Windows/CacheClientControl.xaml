@@ -5,21 +5,15 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:localWindows="clr-namespace:MonitorServer.Windows"
              mc:Ignorable="d" 
-             d:DesignHeight="350" d:DesignWidth="420">
+             d:DesignHeight="100" d:DesignWidth="100">
     <StackPanel>
-        <StackPanel Orientation="Horizontal" Background="#F0F0F0">
-            <Label Content="IP : "/>
-            <Label Content="{Binding clientIP}"/>
-            <Label Content="{Binding NetStatusMsg}" Margin="20,0,0,0" Foreground="{Binding NetStatusColor, Mode=OneWay}" Width="100"/>
-            <Label Content="{Binding computerName}" Width="100"/>
-            <Button Content="Reboot" Margin="20,0,0,0" Command="{Binding OnClickReboot}" IsEnabled="{Binding UIEnable}"/>
+        <StackPanel Orientation="Horizontal" Background="#6C6C6C">
+            <Ellipse Width="10" Height="10" Fill="{Binding FullStatusColor, Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,15,0"/>
+            <Label Content="{Binding NetStatusMsg}" Foreground="White" Margin="0,0,15,0"/>
+            <Label Content="IP : " Foreground="White"/>
+            <Label Content="{Binding clientIP}" Foreground="White"/>
+            <Label Content="{Binding computerName}" Foreground="White" Width="140"/>
+            <Button Content="重新啟動" Margin="0,5,0,5" Command="{Binding OnClickReboot}" IsEnabled="{Binding UIEnable}"/>
         </StackPanel>
-        <ListBox x:Name="AppMonitorResults" Width="420" BorderThickness="0">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <localWindows:AppMonitorResult/>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
     </StackPanel>
 </UserControl>

@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace MonitorServer.Windows
 {
     /// <summary>
-    /// AppMonitorResult.xaml 的互動邏輯
+    /// SelectClient.xaml 的互動邏輯
     /// </summary>
-    public partial class AppMonitorResult : UserControl
+    public partial class SelectClient : UserControl
     {
-        public AppMonitorResult ()
+        public SelectClient ()
         {
             InitializeComponent ();
 
@@ -31,10 +31,12 @@ namespace MonitorServer.Windows
         {
             if (DataContext != null)
             {
-                runTimeMonitorData = DataContext as RunTimeMonitorData;
+                cacheClient = DataContext as CacheClient;
+
+                AppMonitorResults.ItemsSource = cacheClient.runTimeMonitorDatas;
             }
         }
 
-        RunTimeMonitorData runTimeMonitorData;
+        CacheClient cacheClient;
     }
 }

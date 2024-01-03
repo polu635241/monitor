@@ -10,6 +10,17 @@ namespace MonitorCore
     public class MonitorResult
     {
         public List<MonitorData> monitorDatas = new List<MonitorData> ();
+
+        public void CreateTempFromSetting (MonitorSetting monitorSetting) 
+        {
+            this.monitorDatas = monitorSetting.monitorApps.ConvertAll (app=> 
+            {
+                MonitorData data = new MonitorData ();
+                data.appName = app.appName;
+                data.pids = new List<int> ();
+                return data;
+            });
+        }
     }
 
     [Serializable]

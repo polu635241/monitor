@@ -42,13 +42,35 @@ namespace MonitorServer
             cacheClients = networkSetting.clients.ConvertAll (client=> 
             {
                 CacheClient cacheClient = new CacheClient ();
-                cacheClient.Init (client, networkSetting.reconnectTime, monitorSetting, OnModify);
+                cacheClient.Init (client, networkSetting.reconnectTime, monitorSetting, OnModify, OnConnectChange);
                 return cacheClient;
             });
+
+            cacheClients.ForEach (c => c.RevertToTemp ());
+
+            OnConnectChange ();
 
             cacheClients.ForEach (c => c.DoConnect ());
 
             CacheClientControls.ItemsSource = cacheClients;
+
+            curSelectIndex = 0;
+
+            if (cacheClients.Count > 0) 
+            {
+                CacheClientControls.SelectedIndex = 0;
+
+                UpdateSelectData ();
+            }
+        }
+
+        int curSelectIndex = 0;
+
+        void OnConnectChange () 
+        {
+            var connectCount = cacheClients.Count (c => c.IsConnect);
+
+            ConnectStatusText.Content = $"{connectCount}/{cacheClients.Count}";
         }
 
         void OnModify () 
@@ -58,6 +80,8 @@ namespace MonitorServer
                 CacheClientControls.ItemsSource = new List<CacheClient> ();
 
                 CacheClientControls.ItemsSource = cacheClients;
+
+                UpdateSelectData ();
             });
         }
 
@@ -66,6 +90,22 @@ namespace MonitorServer
         void Window_Closing (object sender, CancelEventArgs e) 
         {
             cacheClients.ForEach (c => c.Dispose ());
+        }
+
+        void onClientSelect (object sender, SelectionChangedEventArgs e)
+        {
+            var index = CacheClientControls.SelectedIndex;
+
+            if (index >= 0) 
+            {
+                curSelectIndex = index;
+                UpdateSelectData ();
+            }
+        }
+
+        void UpdateSelectData () 
+        {
+            SelectClient.DataContext = cacheClients[curSelectIndex];
         }
     }
 }

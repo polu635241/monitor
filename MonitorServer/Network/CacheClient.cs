@@ -14,18 +14,18 @@ namespace MonitorServer
 {
     public class CacheClient : INotifyPropertyChanged
     {
-        Socket clientSocket;
-
-        public void Init (string ip, float reconnectTime, MonitorSetting monitorSetting, Action onModify)
+        public void Init (string ip, float reconnectTime, MonitorSetting monitorSetting, Action onModify, Action onConnectChange)
         {
             this.onModify = onModify;
+            this.onConnectChange = onConnectChange;
 
             this.ip = ip;
             this.reconnectTime = reconnectTime;
 
             this.monitorSetting = monitorSetting;
 
-            RevertToTemp ();
+            MonitorResult = new MonitorResult ();
+            MonitorResult.CreateTempFromSetting (monitorSetting);
 
             channelTransport = new ChannelTransport ();
             channelTransport.BindEvent<MonitorResult> (SysEvents.UpdateMonitorResult, OnMonitorResultUpdate);
@@ -35,7 +35,9 @@ namespace MonitorServer
 
         Action onModify;
 
-        void OnHeartBeat (HeartBeatMsg heartBeatMsg) 
+        Action onConnectChange;
+
+        void OnHeartBeat (HeartBeatMsg heartBeatMsg)
         {
             DateTime dateTime = new DateTime (heartBeatMsg.ticks);
 
@@ -44,14 +46,14 @@ namespace MonitorServer
             LoggerRouter.WriteLine ($"收到心跳包 -> {msg}");
         }
 
-        void OnClientReq (ClientReqResult req) 
+        void OnClientReq (ClientReqResult req)
         {
             SetComputerName (req.computerName);
 
             channelTransport.SendMsg (SysEvents.UpdateMonitorSetting, monitorSetting);
         }
 
-        void OnMonitorResultUpdate (MonitorResult newRes) 
+        void OnMonitorResultUpdate (MonitorResult newRes)
         {
             this.MonitorResult = newRes;
 
@@ -65,11 +67,11 @@ namespace MonitorServer
         /// <summary>
         /// 把result清成空的
         /// </summary>
-        void RevertToTemp ()
+        public void RevertToTemp ()
         {
             MonitorResult = new MonitorResult ();
 
-            MonitorResult.monitorDatas = monitorSetting.monitorApps.ConvertAll (app=> 
+            MonitorResult.monitorDatas = monitorSetting.monitorApps.ConvertAll (app =>
             {
                 MonitorData monitorData = new MonitorData ();
                 monitorData.appName = app.appName;
@@ -83,15 +85,15 @@ namespace MonitorServer
 
         public string clientIP => ip;
 
-        public ICommand OnClickReboot 
+        public ICommand OnClickReboot
         {
-            get 
+            get
             {
                 return new GenericCmd (OnClickRebootCmd);
             }
         }
 
-        void OnClickRebootCmd () 
+        void OnClickRebootCmd ()
         {
             RebootCmd cmd = new RebootCmd ();
             channelTransport.SendMsg (SysEvents.RebootCmd, cmd);
@@ -103,7 +105,7 @@ namespace MonitorServer
 
         ChannelTransport channelTransport;
 
-        public void DoConnect () 
+        public void DoConnect ()
         {
             tcpClient = new TcpClient ();
 
@@ -125,14 +127,19 @@ namespace MonitorServer
             }, tcpClient);
         }
 
-        void OnConnect () 
+        void OnConnect ()
         {
-            IsConnect = true;
+            MainWindow.Instance.Dispatcher.Invoke (() =>
+            {
+                IsConnect = true;
 
-            OnConnectStatusChange ();
+                OnConnectStatusChange ();
+
+                onConnectChange.Invoke ();
+            });
         }
 
-        void OnConnectStatusChange () 
+        void OnConnectStatusChange ()
         {
             if (PropertyChanged != null)
             {
@@ -152,20 +159,25 @@ namespace MonitorServer
             }
         }
 
-        void OnDisconnect () 
+        void OnDisconnect ()
         {
             IsConnect = false;
-
-            SetComputerName ("");
-
-            OnConnectStatusChange ();
-
-            RevertToTemp ();
 
             if (channelTransport.ManualDisconnect == false)
             {
                 DoConnect ();
             }
+
+            MainWindow.Instance.Dispatcher.Invoke (() =>
+            {
+                SetComputerName ("");
+
+                OnConnectStatusChange ();
+
+                RevertToTemp ();
+
+                onConnectChange.Invoke ();
+            });
         }
 
         IAsyncResult IAsyncResult;
@@ -173,6 +185,21 @@ namespace MonitorServer
         public event PropertyChangedEventHandler PropertyChanged;
 
         public bool UIEnable => IsConnect;
+
+        public string NetStatusMsg
+        {
+            get
+            {
+                if (IsConnect)
+                {
+                    return "上線";
+                }
+                else
+                {
+                    return "下線";
+                }
+            }
+        }
 
         public Brush NetStatusColor
         {
@@ -186,35 +213,112 @@ namespace MonitorServer
                 }
                 else
                 {
-                    color = (Color)ColorConverter.ConvertFromString ("red");
+                    color = (Color)ColorConverter.ConvertFromString ("#FF2D2D");
                 }
 
                 return new SolidColorBrush (color);
             }
         }
 
-        public string computerName { get; private set; } = "";
-
-        public string NetStatusMsg 
+        public string AppStatusMsg
         {
-            get 
+            get
             {
-                if (IsConnect) 
+                if (EveryActive)
                 {
-                    return "已成功連線";
+                    return "正常";
                 }
                 else
                 {
-                    return "尚未連線";
+                    return "異常";
                 }
             }
         }
 
+        public Brush AppStatusColor
+        {
+            get
+            {
+                Color color = default;
+
+                if (EveryActive)
+                {
+                    color = (Color)ColorConverter.ConvertFromString ("green");
+                }
+                else
+                {
+                    color = (Color)ColorConverter.ConvertFromString ("orange");
+                }
+
+                return new SolidColorBrush (color);
+            }
+        }
+
+        /// <summary>
+        /// 整合了所有狀況的
+        /// </summary>
+        public Brush FullStatusColor
+        {
+            get
+            {
+                Color color = default;
+
+                if (IsConnect) 
+                
+                {
+                    return AppStatusColor;
+                }
+                else
+                {
+                    color = (Color)ColorConverter.ConvertFromString ("#FF2D2D");
+                }
+
+                return new SolidColorBrush (color);
+            }
+        }
+
+        public bool IsSelect;
+
+        /// <summary>
+        /// 這個物件的顏色
+        /// 包含是否選擇
+        /// </summary>
+        public Brush CellStatusColor
+        {
+            get
+            {
+                Color color = default;
+
+                if (IsSelect) 
+                {
+                    color = (Color)ColorConverter.ConvertFromString ("yellow");
+                }
+                else
+                {
+                    
+                }
+
+                if (IsConnect)
+
+                {
+                    return AppStatusColor;
+                }
+                else
+                {
+                    color = (Color)ColorConverter.ConvertFromString ("#FF2D2D");
+                }
+
+                return new SolidColorBrush (color);
+            }
+        }
+
+        public string computerName { get; private set; } = "未連接";
+
         public bool IsConnect { get; private set; }
 
-        public void Dispose () 
+        public void Dispose ()
         {
-            if (IsConnect) 
+            if (IsConnect)
             {
                 channelTransport.Disconnect ();
             }
@@ -228,11 +332,27 @@ namespace MonitorServer
         }
 
         public List<RunTimeMonitorData> runTimeMonitorDatas;
+
+        bool EveryActive 
+        {
+            get 
+            {
+                if (runTimeMonitorDatas != null) 
+                {
+                    if (runTimeMonitorDatas.TrueForAll (data => data.HasActive)) 
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
     }
 
     public class RunTimeMonitorData : INotifyPropertyChanged
     {
-        public RunTimeMonitorData (MonitorData monitorData) 
+        public RunTimeMonitorData (MonitorData monitorData)
         {
             this.bindingData = monitorData;
         }
@@ -245,18 +365,42 @@ namespace MonitorServer
 
         public int appCount => pids.Count;
 
-        public List<RunTimeMonitorPID> pids => bindingData.pids.ConvertAll (pid => new RunTimeMonitorPID (pid));
-    }
+        public List<int> pids => bindingData.pids.ToList ();
 
-    public class RunTimeMonitorPID : INotifyPropertyChanged
-    {
-        public RunTimeMonitorPID (int pid) 
+        public bool HasActive => appCount > 0;
+
+        public string appStatus 
         {
-            this.pid = pid.ToString ();
+            get 
+            {
+                if (HasActive) 
+                {
+                    return "已啟動";
+                }
+                else
+                {
+                    return "未啟動";
+                }
+            }
         }
 
-        public string pid { get; set; }
+        public Brush appStatusColor
+        {
+            get
+            {
+                Color color = default;
 
-        public event PropertyChangedEventHandler PropertyChanged;
+                if (HasActive)
+                {
+                    color = (Color)ColorConverter.ConvertFromString ("green");
+                }
+                else
+                {
+                    color = (Color)ColorConverter.ConvertFromString ("#FF2D2D");
+                }
+
+                return new SolidColorBrush (color);
+            }
+        }
     }
 }
