@@ -14,7 +14,7 @@
         <StackPanel Orientation="Horizontal">
             <Label Content="連線狀態:" Foreground="White"/>
             <Label Content="{Binding NetStatusMsg}" Margin="0,0,15,0" Foreground="{Binding NetStatusColor}"/>
-            <Ellipse Width="10" Height="10" Fill="{Binding FullStatusColor, Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,15,0"/>
+            <Ellipse Width="10" Height="10" Fill="{Binding NetStatusColor, Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,15,0"/>
             <Label Content="檢測狀態:" Foreground="White"/>
             <Label Content="{Binding AppStatusMsg}" Margin="0,0,15,0" Foreground="{Binding AppStatusColor}"/>
             <Ellipse Width="10" Height="10" Fill="{Binding AppStatusColor, Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,15,0"/>
