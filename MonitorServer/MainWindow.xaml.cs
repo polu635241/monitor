@@ -1,4 +1,4 @@
-﻿using MonitorCore;
+using MonitorCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -105,6 +105,7 @@ namespace MonitorServer
 
         void UpdateSelectData () 
         {
+            SelectClient.DataContext = null;
             SelectClient.DataContext = cacheClients[curSelectIndex];
         }
     }
